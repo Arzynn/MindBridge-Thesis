@@ -1,0 +1,51 @@
+<main class="student-portal-shell" id="student-screening" data-portal-section="screening">
+  <section class="portal-heading">
+    <p class="portal-eyebrow">Mental wellness check-in</p>
+    <h1>DASS-21 Screening</h1>
+    <p>This self-report screening supports counselor awareness. It is not a diagnosis and does not assess immediate safety.</p>
+  </section>
+  <div class="portal-message" data-portal-message role="status" aria-live="polite">Checking your screening access…</div>
+  <div class="portal-message" data-dass-result role="status" aria-live="polite" hidden></div>
+  <section class="portal-content-stack" data-portal-content hidden>
+    <article class="portal-card dass-screening-card">
+      <p class="dass-instructions">Please read each statement and indicate how much it applied to you over the past week. There are no right or wrong answers. Do not spend too much time on any statement.</p>
+      <div class="portal-message portal-message-error" data-dass-gate role="status" aria-live="polite" hidden></div>
+      <form data-dass-form novalidate>
+        <div class="dass-progress">
+          <span data-dass-progress-text>0 of 21 answered</span>
+          <progress max="21" value="0" data-dass-progress-bar aria-label="Questionnaire completion"></progress>
+        </div>
+        <div class="dass-questions" data-dass-questions></div>
+        <section class="dass-review-panel" data-dass-review hidden>
+          <h2>Review your answers</h2>
+          <ol data-dass-review-list></ol>
+          <div class="dass-review-actions">
+            <button type="button" class="portal-button portal-button-secondary" data-dass-edit>Back to questions</button>
+            <button type="button" class="portal-button" data-dass-confirm>Confirm and submit</button>
+          </div>
+        </section>
+        <div class="dass-submit-row" data-dass-submit-row>
+          <label class="dass-consent" data-dass-consent-row hidden>
+            <input type="checkbox" data-dass-consent>
+            <span data-dass-consent-text></span>
+          </label>
+          <button type="button" class="portal-button" data-dass-review-button disabled>Review my answers</button>
+        </div>
+      </form>
+    </article>
+    <article class="portal-card">
+      <h2>My screening participation</h2>
+      <p class="portal-muted">Your progress page shows participation dates only. DASS-21 subscale scores and response choices are available to authorized counselors, not displayed here.</p>
+      <div data-dass-history></div>
+      <p class="portal-muted" data-week-detail></p>
+    </article>
+    <article class="portal-card">
+      <h2>Need human support?</h2>
+      <p>Do not wait for a future screening if you need support. Contact your institution's Guidance Office or local emergency services if you are in immediate danger. This screening is not an emergency service.</p>
+      <a class="portal-button portal-button-secondary" href="?page=resources">View support contacts</a>
+    </article>
+  </section>
+</main>
+<script>
+  UI.loadStudentPortal('screening');
+</script>

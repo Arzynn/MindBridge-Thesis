@@ -1,0 +1,15 @@
+<main class="student-portal-shell" id="student-profile" data-portal-section="profile">
+  <section class="portal-heading">
+    <p class="portal-eyebrow">Your account</p>
+    <h1>My Profile</h1>
+    <p>Account details currently available to MindBridge.</p>
+  </section>
+  <div class="portal-message" data-portal-message role="status" aria-live="polite">Loading your profile…</div>
+  <section class="portal-card" data-portal-content hidden>
+    <dl class="student-profile-list" data-profile-fields></dl>
+    <p class="portal-muted">Profile details are read-only here. Contact the MindBridge administrator to request a correction.</p>
+  </section>
+</main>
+<script>
+  UI.loadStudentPortal('profile');
+</script>

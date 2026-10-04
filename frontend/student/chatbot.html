@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MindBridge - Wellness Support Assistant</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .chat-container { height: 450px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; background: #f8f9fa; }
+    .msg-bubble { max-width: 75%; padding: 10px 15px; border-radius: 15px; margin-bottom: 12px; }
+    .msg-student { background-color: #0d6efd; color: white; margin-left: auto; border-bottom-right-radius: 2px; }
+    .msg-ai { background-color: #e9ecef; color: #212529; margin-right: auto; border-bottom-left-radius: 2px; }
+    .msg-system { background-color: #fff3cd; color: #664d03; margin: auto; text-align: center; border: 1px solid #ffe69c; }
+    .disclaimer-banner { font-size: 0.85rem; background-color: #e7f1ff; color: #084298; border-left: 4px solid #0d6efd; }
+  </style>
+</head>
+<body class="p-3">
+  <div class="container max-w-lg">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white">
+        <h5 class="card-title text-primary mb-0">MindBridge Wellness Assistant</h5>
+      </div>
+      <div class="card-body">
+        <div class="p-2 mb-3 disclaimer-banner rounded">
+          <strong>Notice:</strong> MindBridge is an AI-assisted counseling support tool. AI drafts are reviewed by human guidance counselors. If you are in immediate distress, please utilize emergency services.
+        </div>
+
+        <div id="crisis-alert-area"></div>
+
+        <div id="chat-window" class="chat-container d-flex flex-column">
+          <div class="msg-bubble msg-ai">
+            Hello. I am the MindBridge Assistant. How are you feeling today?
+          </div>
+        </div>
+
+        <div class="input-group mt-3">
+          <input type="text" id="chat-input" class="form-control" placeholder="Type your message here..." onkeydown="if(event.key==='Enter') sendMessage()">
+          <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeSessionId = null;
+    let sessionToken = null;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      UI.activateStudentNavigation();
+      const storedUser = JSON.parse(sessionStorage.getItem('mindbridge_user') || 'null');
+      sessionToken = sessionStorage.getItem('mindbridge_session_token');
+      if (!storedUser || storedUser.role !== 'STUDENT' || !sessionToken) {
+        UI.navigateToPage('login');
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function (result) {
+        if (result && result.success) {
+          activeSessionId = result.sessionId;
+        } else {
+          console.error(result && result.error ? result.error : 'Unable to create an active session.');
+          appendMessage('SYSTEM', 'Session unavailable. Please refresh or sign in again.');
+        }
+      }).withFailureHandler(function (error) {
+        console.error(error);
+        appendMessage('SYSTEM', 'A system error occurred while loading your session.');
+      }).getOrCreateActiveSession(sessionToken);
+    });
+
+    function sendMessage() {
+      const inputEl = document.getElementById('chat-input');
+      const text = inputEl.value.trim();
+      if (!text || !activeSessionId || !sessionToken) return;
+
+      appendMessage('STUDENT', text);
+      inputEl.value = '';
+      const sendButton = document.getElementById('chat-send-button');
+      if (sendButton) {
+        sendButton.disabled = true;
+        sendButton.textContent = 'Sending…';
+      }
+
+      UI.runServerFunction('processStudentMessage', [sessionToken, activeSessionId, text], function(response) {
+        if (sendButton) {
+          sendButton.disabled = false;
+          sendButton.textContent = 'Send';
+        }
+        if (response.status === 'ERROR') {
+          appendMessage('SYSTEM', response.message);
+          if (response.crisisResources) displayCrisisResources(response.crisisResources);
+          return;
+        }
+        if (response.status === 'OUT_OF_SCOPE') {
+          appendMessage('SYSTEM', response.message);
+        } else if (response.status === 'RISK_DETECTED') {
+          appendMessage('SYSTEM', response.message);
+          displayCrisisResources(response.crisisResources);
+        } else if (response.status === 'WAITING_FOR_REVIEW') {
+          appendMessage('SYSTEM', response.message);
+        } else if (response.status === 'SYSTEM_FALLBACK') {
+          appendMessage('SYSTEM', response.message);
+        }
+      }, function(error) {
+        if (sendButton) {
+          sendButton.disabled = false;
+          sendButton.textContent = 'Send';
+        }
+        appendMessage('SYSTEM', error && error.message ? error.message : 'Unable to send your message. Please try again.');
+      });
+    }
+
+    function appendMessage(sender, text) {
+      const win = document.getElementById('chat-window');
+      const div = document.createElement('div');
+      div.className = 'msg-bubble ' + (sender === 'STUDENT' ? 'msg-student' : (sender === 'SYSTEM' ? 'msg-system' : 'msg-ai'));
+      div.innerText = text;
+      win.appendChild(div);
+      win.scrollTop = win.scrollHeight;
+    }
+
+    function displayCrisisResources(resources) {
+      const area = document.getElementById('crisis-alert-area');
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-danger';
+      alert.setAttribute('role', 'alert');
+      const heading = document.createElement('h5');
+      heading.className = 'alert-heading';
+      heading.textContent = 'Configured support contacts — confirm availability';
+      alert.appendChild(heading);
+      const notice = document.createElement('p');
+      notice.textContent = 'These contacts are configured for this application and have not been verified by MindBridge. If unavailable, contact local emergency services or go to the nearest emergency department.';
+      alert.appendChild(notice);
+      [resources.INSTITUTIONAL_HOTLINE, resources.NATIONAL_CRISIS_LINE, resources.EMERGENCY_SERVICES]
+        .forEach(function (resource) {
+          const paragraph = document.createElement('p');
+          paragraph.className = 'mb-1';
+          paragraph.textContent = resource;
+          alert.appendChild(paragraph);
+        });
+      area.replaceChildren(alert);
+    }
+  </script>
+</body>
+</html>

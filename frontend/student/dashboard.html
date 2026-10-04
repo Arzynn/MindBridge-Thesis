@@ -1,0 +1,38 @@
+<main class="student-portal-shell" id="student-dashboard" data-portal-section="dashboard">
+  <section class="portal-heading">
+    <p class="portal-eyebrow">Your wellness space</p>
+    <h1>Welcome, <span data-student-name>Student</span></h1>
+    <p>Use this private space to check in with yourself and find support.</p>
+  </section>
+  <div class="portal-message" data-portal-message role="status" aria-live="polite">Loading your dashboard…</div>
+  <section class="portal-grid" data-portal-content hidden>
+    <article class="portal-card portal-card-highlight">
+      <p class="portal-card-label">DASS-21 screening</p>
+      <h2 data-week-status></h2>
+      <p data-week-detail></p>
+      <a class="portal-button" href="?page=screening">Open weekly screening</a>
+    </article>
+    <article class="portal-card">
+      <p class="portal-card-label">Latest completed screening</p>
+      <div data-latest-screening></div>
+    </article>
+    <article class="portal-card">
+      <p class="portal-card-label">Previous activity</p>
+      <div data-activity-summary></div>
+      <a class="portal-text-link" href="?page=progress">View wellness progress</a>
+    </article>
+  </section>
+  <section class="portal-quick-actions" data-portal-content hidden>
+    <a class="portal-action-card" href="?page=chatbot">
+      <span class="portal-action-icon" aria-hidden="true">✦</span>
+      <span><strong>Open AI Wellness Chatbot</strong><small>Share what's on your mind. AI drafts are reviewed by a counselor.</small></span>
+    </a>
+    <a class="portal-action-card" href="?page=resources">
+      <span class="portal-action-icon" aria-hidden="true">♡</span>
+      <span><strong>Wellness resources and human support</strong><small>Find published resources and guidance office contacts.</small></span>
+    </a>
+  </section>
+</main>
+<script>
+  UI.loadStudentPortal('dashboard');
+</script>

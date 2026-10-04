@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindBridge | Counselor Registration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, rgba(15, 118, 110, 0.05), rgba(248, 250, 252, 0.96) 25%, #f8fafc 100%);
+      font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      padding: 28px 16px;
+    }
+    .register-card {
+      width: min(100%, 520px);
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: 18px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    .register-header {
+      padding: 28px 28px 18px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(15, 118, 110, 0.03), rgba(255, 255, 255, 0.8));
+    }
+    .brand-lockup {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0f766e, #1e3a8a);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 800;
+      box-shadow: 0 14px 22px rgba(15, 118, 110, 0.2);
+    }
+    .brand-name {
+      margin: 0;
+      font-weight: 800;
+      font-size: 1.8rem;
+      letter-spacing: -0.04em;
+      color: #0f172a;
+    }
+    .brand-subtitle {
+      margin: 0;
+      color: #475569;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .register-body {
+      padding: 0 28px 28px;
+    }
+    .form-label {
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+    .form-control, .form-select {
+      height: 52px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: #fff;
+      font-size: 0.97rem;
+      padding: 0.8rem 0.9rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: rgba(15, 118, 110, 0.5);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+      outline: none;
+    }
+    .form-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 0 0 18px;
+      color: #475569;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .form-check-input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      border-color: rgba(148, 163, 184, 0.6);
+    }
+    .form-check-input:checked {
+      background-color: #0f766e;
+      border-color: #0f766e;
+    }
+    .btn-primary {
+      width: 100%;
+      height: 52px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0f766e, #115e59);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: 0 16px 25px rgba(15, 118, 110, 0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(135deg, #0f766e, #115e59);
+      box-shadow: 0 18px 30px rgba(15, 118, 110, 0.24);
+    }
+    .btn-primary:disabled {
+      opacity: 0.85;
+      cursor: wait;
+    }
+    .loading-state {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary.is-loading .normal-state {
+      display: none;
+    }
+    .btn-primary.is-loading .loading-state {
+      display: inline-flex;
+    }
+    .spinner-border {
+      width: 0.9rem;
+      height: 0.9rem;
+      border-width: 0.12rem;
+    }
+    .signin-link {
+      margin-top: 16px;
+      text-align: center;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+    .signin-link a {
+      color: #0f766e;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .signin-link a:hover {
+      color: #115e59;
+      text-decoration: underline;
+    }
+    .text-danger {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      display: block;
+    }
+    .password-error {
+      display: none;
+    }
+    @media (max-width: 420px) {
+      .register-header, .register-body {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-card">
+    <div class="register-header">
+      <div class="brand-lockup">
+        <div class="brand-mark">M</div>
+        <h1 class="brand-name">MindBridge</h1>
+      </div>
+      <p class="brand-subtitle">Counselor account registration</p>
+    </div>
+    <div class="register-body">
+      <div id="counselorRegistrationMessage" class="alert alert-warning" role="status" hidden></div>
+      <form id="counselorRegisterForm" novalidate>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="firstName" class="form-label">First Name</label>
+            <input type="text" id="firstName" class="form-control" placeholder="Maria" required>
+          </div>
+          <div class="col-md-6">
+            <label for="lastName" class="form-label">Last Name</label>
+            <input type="text" id="lastName" class="form-control" placeholder="Santos" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="staffId" class="form-label">Counselor ID / Staff Number</label>
+          <input type="text" id="staffId" class="form-control" placeholder="C-2024-118" required>
+        </div>
+        <div class="mb-3">
+          <label for="department" class="form-label">Department</label>
+          <input type="text" id="department" class="form-control" placeholder="Guidance & Counseling" required>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Institutional Email</label>
+          <input type="email" id="email" class="form-control" placeholder="counselor@university.edu" required>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Create a password" required>
+        </div>
+        <div class="mb-3">
+          <label for="confirmPassword" class="form-label">Confirm Password</label>
+          <input type="password" id="confirmPassword" class="form-control" placeholder="Re-enter your password" required>
+          <span id="passwordError" class="text-danger password-error">Passwords do not match.</span>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="consentCheck" required>
+          <label class="form-check-label" for="consentCheck">
+            I agree to the MindBridge counselor access policy and confidentiality requirements.
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary" id="registerButton">
+          <span class="normal-state">Create Account</span>
+          <span class="loading-state">
+            <span class="spinner-border" role="status" aria-hidden="true"></span>
+            Creating Account...
+          </span>
+        </button>
+      </form>
+      <div class="signin-link">
+        Already have an account? <a href="?page=counselor_login">Sign In</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    const form = document.getElementById('counselorRegisterForm');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const passwordError = document.getElementById('passwordError');
+    function validatePasswords() {
+      const matches = password.value && confirmPassword.value && password.value === confirmPassword.value;
+      passwordError.style.display = matches || (!password.value && !confirmPassword.value) ? 'none' : 'block';
+      return matches;
+    }
+    password.addEventListener('input', validatePasswords);
+    confirmPassword.addEventListener('input', validatePasswords);
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formValid = form.checkValidity();
+      if (!formValid) {
+        form.reportValidity();
+        return;
+      }
+      if (!validatePasswords()) {
+        confirmPassword.focus();
+        return;
+      }
+      const message = document.getElementById('counselorRegistrationMessage');
+      message.textContent = 'Counselor self-registration is not connected to an approved account-creation service. Please contact your MindBridge administrator.';
+      message.hidden = false;
+    });
+  </script>
+</body>
+</html>

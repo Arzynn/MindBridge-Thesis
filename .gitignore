@@ -1,0 +1,20 @@
+# Secrets and local project configuration
+.env
+.env.*
+!.env.example
+.clasp.json
+
+# Generated Apps Script deployment output; rebuild before deployment
+apps-script/
+
+# Local dependencies, archives, logs, and temporary build directories
+node_modules/
+*.zip
+*.log
+.mindbridge-build-temp/
+.mindbridge-gas-build-temp/
+.build-validation/
+
+# Operating system files
+.DS_Store
+Thumbs.db

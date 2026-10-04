@@ -1,0 +1,114 @@
+<main class="counselor-portal-shell" id="counselor-portal">
+  <div class="counselor-portal-heading">
+    <div>
+      <p class="portal-eyebrow">Counselor workspace</p>
+      <h1 data-counselor-title>Dashboard</h1>
+      <p data-counselor-description>Current student support activity from MindBridge records.</p>
+    </div>
+    <span class="counselor-user-label" data-counselor-name></span>
+  </div>
+  <div class="portal-message" data-counselor-message role="status" aria-live="polite">Loading counselor portal…</div>
+  <section data-counselor-dashboard data-counselor-content hidden>
+    <div class="counselor-metric-grid" data-dashboard-metrics></div>
+    <article class="counselor-panel">
+      <h2>Recent risk notifications</h2>
+      <div data-dashboard-alerts></div>
+    </article>
+  </section>
+  <section data-counselor-students data-counselor-content hidden>
+    <article class="counselor-panel">
+      <label for="counselor-student-search">Search student records</label>
+      <div class="counselor-search-row">
+        <input id="counselor-student-search" type="search" maxlength="80" placeholder="Name, student number, or course">
+        <button class="portal-button" type="button" data-student-search>Search</button>
+      </div>
+      <div data-student-list></div>
+      <p class="portal-muted" data-student-limit></p>
+    </article>
+    <article class="counselor-panel" data-student-search-detail hidden></article>
+  </section>
+  <section data-counselor-student data-counselor-content hidden>
+    <a href="?page=counselor-students" class="portal-text-link">← Back to student records</a>
+    <article class="counselor-panel counselor-record-detail" data-student-detail></article>
+  </section>
+  <section data-counselor-screenings data-counselor-content hidden>
+    <article class="counselor-panel">
+      <p class="portal-muted">DASS-21 results are decision-support information, not diagnoses. Review status and alert priority follow the configured policy.</p>
+      <div class="counselor-filter-grid">
+        <label>From date <input type="date" data-screening-from></label>
+        <label>To date <input type="date" data-screening-to></label>
+        <label>Review status
+          <select data-screening-status>
+            <option value="">All statuses</option>
+            <option value="POLICY_PENDING">Policy approval pending</option>
+            <option value="PENDING">Pending review</option>
+            <option value="REVIEWED">Reviewed</option>
+            <option value="FOLLOW_UP">Follow-up</option>
+            <option value="CLOSED">Closed</option>
+            <option value="NOT_REQUIRED">No review required</option>
+          </select>
+        </label>
+        <label>Priority
+          <select data-screening-priority>
+            <option value="">All priority levels</option>
+            <option value="PRIORITY">Priority</option>
+            <option value="ROUTINE">Routine</option>
+            <option value="NONE">No threshold review</option>
+          </select>
+        </label>
+        <button type="button" class="portal-button" data-screening-filter>Apply filters</button>
+      </div>
+      <div data-screening-list></div>
+      <p class="portal-muted" data-screening-limit></p>
+      <div data-screening-detail hidden></div>
+    </article>
+  </section>
+  <section data-counselor-risks data-counselor-content hidden>
+    <article class="counselor-panel">
+      <label for="risk-status-filter">Risk notification status</label>
+      <select id="risk-status-filter">
+        <option value="">All statuses</option>
+        <option value="PENDING">Pending</option>
+        <option value="REVIEWED">Reviewed</option>
+        <option value="FOLLOW_UP">Follow-up</option>
+        <option value="CLOSED">Closed</option>
+      </select>
+      <div data-risk-list></div>
+    </article>
+  </section>
+  <section data-counselor-followups data-counselor-content hidden>
+    <article class="counselor-panel">
+      <p class="portal-muted">Follow-ups are represented by screening review records in FOLLOW_UP status. Appointment dates and private notes are not collected by the approved current workflow.</p>
+      <div data-followup-list></div>
+    </article>
+  </section>
+  <section data-counselor-reports data-counselor-content hidden>
+    <article class="counselor-panel">
+      <p class="portal-muted">Screening counts cover the rolling seven-day period; the trend summarizes recent calendar weeks. These are operational counts, not clinical conclusions.</p>
+      <div class="counselor-metric-grid" data-report-metrics></div>
+      <h2>Weekly screening trend</h2>
+      <div data-weekly-screening-trend></div>
+      <p class="portal-muted" data-screening-trend-limit></p>
+      <h2>Recent counselor review actions</h2>
+      <div data-recent-counselor-reviews></div>
+    </article>
+  </section>
+  <section data-counselor-resources data-counselor-content hidden>
+    <article class="counselor-panel">
+      <h2>Published counselor-approved resources</h2>
+      <div data-counselor-resources-list></div>
+    </article>
+  </section>
+  <section data-counselor-profile data-counselor-content hidden>
+    <article class="counselor-panel">
+      <h2>Account profile</h2>
+      <dl data-counselor-profile-fields></dl>
+      <p class="portal-muted">Profile editing and account settings are not supported by the current schema. Contact the project administrator for account changes.</p>
+    </article>
+  </section>
+</main>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    UI.loadCounselorPortal(document.body.dataset.pageKey || 'counselor');
+  });
+</script>

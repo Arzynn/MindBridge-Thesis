@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Counselor AI Review Queue</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+  <div class="container-fluid">
+    <h3 class="mb-4">Pending AI Response Reviews</h3>
+    <div id="reviews-container"></div>
+    <h3 class="my-4">Pending Student Risk Notifications</h3>
+    <div id="risk-flags-container"></div>
+  </div>
+
+  <script>
+    let sessionToken = null;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const storedUser = JSON.parse(sessionStorage.getItem('mindbridge_user') || 'null');
+      sessionToken = sessionStorage.getItem('mindbridge_session_token');
+      if (!storedUser || storedUser.role !== 'COUNSELOR' || !sessionToken) {
+        UI.navigateToPage('counselor_login');
+        return;
+      }
+
+      UI.activateCounselorNavigation('counselor-reviews');
+      loadPendingReviews();
+      loadPendingRiskFlags();
+    });
+
+    function loadPendingReviews() {
+      google.script.run.withSuccessHandler(function (result) {
+        if (!result || !result.success) {
+          showReviewMessage((result && result.error) || 'Unable to load pending reviews.', 'danger');
+          return;
+        }
+
+        renderReviews(result.data || []);
+      }).withFailureHandler(function (error) {
+        showReviewMessage(error && error.message ? error.message : 'Unable to load pending reviews.', 'danger');
+      }).getPendingAIReviews(sessionToken);
+    }
+
+    function loadPendingRiskFlags() {
+      google.script.run.withSuccessHandler(function (result) {
+        if (!result || !result.success) {
+          renderRiskMessage((result && result.error) || 'Unable to load risk notifications.', 'danger');
+          return;
+        }
+        renderRiskFlags(result.data || []);
+      }).withFailureHandler(function (error) {
+        renderRiskMessage(error && error.message ? error.message : 'Unable to load risk notifications.', 'danger');
+      }).getPendingRiskFlags(sessionToken);
+    }
+
+    function renderRiskMessage(message, type) {
+      const container = document.getElementById('risk-flags-container');
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-' + type;
+      alert.textContent = message;
+      container.replaceChildren(alert);
+    }
+
+    function renderRiskFlags(flags) {
+      const container = document.getElementById('risk-flags-container');
+      container.replaceChildren();
+      if (!flags.length) {
+        renderRiskMessage('No pending risk notifications.', 'info');
+        return;
+      }
+      flags.forEach(function (flag) {
+        const card = document.createElement('section');
+        card.className = 'card mb-3 shadow-sm';
+        const body = document.createElement('div');
+        body.className = 'card-body';
+        const heading = document.createElement('h5');
+        heading.className = 'card-title';
+        heading.textContent = 'Risk notification · ' + flag.trigger_type;
+        const details = document.createElement('p');
+        details.className = 'card-text';
+        const profile = Array.isArray(flag.student_profiles) ? flag.student_profiles[0] : flag.student_profiles;
+        const studentNumber = profile && profile.student_number ? profile.student_number : flag.student_id;
+        details.textContent = 'Student: ' + studentNumber + ' · Priority: ' + (flag.priority || flag.severity) +
+          (flag.trigger_value ? ' · Rule: ' + flag.trigger_value : '') +
+          ' · Received: ' + (flag.created_at || 'Date unavailable');
+        body.append(heading, details);
+        const actions = document.createElement('div');
+        actions.className = 'card-footer bg-white text-end';
+        [['Mark reviewed', 'REVIEWED'], ['Follow up', 'FOLLOW_UP'], ['Close', 'CLOSED']].forEach(function (option) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn btn-outline-secondary me-2';
+          button.textContent = option[0];
+          button.addEventListener('click', function () {
+            reviewRiskFlag(flag.id, option[1], button);
+          });
+          actions.appendChild(button);
+        });
+        card.append(body, actions);
+        container.appendChild(card);
+      });
+    }
+
+    function reviewRiskFlag(riskFlagId, status, button) {
+      button.disabled = true;
+      google.script.run.withSuccessHandler(function (result) {
+        if (!result || !result.success) {
+          button.disabled = false;
+          alert((result && result.error) || 'Unable to update risk notification.');
+          return;
+        }
+        const card = button.closest('.card');
+        if (card) card.remove();
+        if (!document.getElementById('risk-flags-container').children.length) {
+          renderRiskMessage('No pending risk notifications.', 'info');
+        }
+      }).withFailureHandler(function (error) {
+        button.disabled = false;
+        alert(error && error.message ? error.message : 'Unable to update risk notification.');
+      }).processRiskFlagReview(sessionToken, riskFlagId, status);
+    }
+
+    function showReviewMessage(message, type) {
+      const container = document.getElementById('reviews-container');
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-' + type;
+      alert.textContent = message;
+      container.replaceChildren(alert);
+    }
+
+    function renderReviews(items) {
+      const container = document.getElementById('reviews-container');
+
+      if (!items.length) {
+        showReviewMessage('No pending AI reviews at the moment.', 'info');
+        return;
+      }
+
+      container.replaceChildren();
+      items.forEach(function (item) {
+        const studentMessage = item.student_message && item.student_message.message
+          ? item.student_message.message
+          : 'Original student message unavailable: this review record has no linked message.';
+        const card = document.createElement('div');
+        card.className = 'card mb-3 shadow-sm';
+        card.id = 'card-stage-' + item.id;
+
+        const header = document.createElement('div');
+        header.className = 'card-header bg-white d-flex justify-content-between align-items-center';
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-warning text-dark';
+        badge.textContent = 'PENDING REVIEW';
+        const received = document.createElement('small');
+        received.className = 'text-muted';
+        received.textContent = 'Received: ' + (item.student_message && item.student_message.created_at
+          ? new Date(item.student_message.created_at).toLocaleString()
+          : new Date(item.created_at).toLocaleString());
+        header.append(badge, received);
+
+        const body = document.createElement('div');
+        body.className = 'card-body';
+        const row = document.createElement('div');
+        row.className = 'row';
+        const studentColumn = document.createElement('div');
+        studentColumn.className = 'col-md-6 border-end';
+        const studentHeading = document.createElement('h6');
+        const studentLabel = item.student && item.student.student_number
+          ? 'Student Input · ' + item.student.student_number + ':'
+          : 'Student Input · identifier unavailable:';
+        studentHeading.textContent = studentLabel;
+        const quote = document.createElement('blockquote');
+        quote.className = 'blockquote fs-6 bg-light p-2 rounded';
+        quote.textContent = studentMessage;
+        studentColumn.append(studentHeading, quote);
+        const draftColumn = document.createElement('div');
+        draftColumn.className = 'col-md-6';
+        const draftHeading = document.createElement('h6');
+        draftHeading.textContent = item.model_name === 'AI_UNAVAILABLE'
+          ? 'Automated draft unavailable — compose a counselor response:'
+          : 'AI-Generated Draft Response:';
+        const draft = document.createElement('textarea');
+        draft.id = 'draft-text-' + item.id;
+        draft.className = 'form-control mb-2';
+        draft.rows = 6;
+        draft.value = item.ai_response || '';
+        draftColumn.append(draftHeading, draft);
+        row.append(studentColumn, draftColumn);
+        body.appendChild(row);
+
+        const footer = document.createElement('div');
+        footer.className = 'card-footer bg-white text-end';
+        [
+          ['Reject Draft', 'REJECTED', 'btn btn-outline-danger me-2'],
+          ['Approve with Edits', 'EDITED', 'btn btn-outline-secondary me-2'],
+          ['Approve & Send', 'APPROVED', 'btn btn-success']
+        ].forEach(function (buttonInfo) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = buttonInfo[2];
+          button.textContent = buttonInfo[0];
+          if (item.model_name === 'AI_UNAVAILABLE' && buttonInfo[1] === 'APPROVED') {
+            button.disabled = true;
+            button.title = 'Write a response and choose Approve with Edits.';
+          }
+          if (!item.student_message && buttonInfo[1] !== 'REJECTED') {
+            button.disabled = true;
+            button.title = 'Sending is blocked because the original student message is not linked.';
+          }
+          button.addEventListener('click', function () {
+            reviewAction(item.id, buttonInfo[1]);
+          });
+          footer.appendChild(button);
+        });
+        card.append(header, body, footer);
+        container.appendChild(card);
+      });
+    }
+
+    function reviewAction(reviewId, action) {
+      const draft = document.getElementById('draft-text-' + reviewId);
+      const draftText = draft ? draft.value : '';
+      const comment = 'Reviewed via counselor dashboard';
+      const card = document.getElementById('card-stage-' + reviewId);
+      const buttons = card ? Array.from(card.querySelectorAll('button')) : [];
+      buttons.forEach(function (button) { button.disabled = true; });
+
+      google.script.run.withSuccessHandler(function (result) {
+        if (result && result.success) {
+          if (card) {
+            card.remove();
+          }
+          alert(action === 'REJECTED' ? 'Review decision saved.' : 'Counselor response saved and delivered to the conversation.');
+          if (!document.getElementById('reviews-container').children.length) {
+            loadPendingReviews();
+          }
+        } else {
+          buttons.forEach(function (button) { button.disabled = false; });
+          alert('Execution Error: ' + ((result && result.error) || 'Review failed.'));
+        }
+      }).withFailureHandler(function (error) {
+        buttons.forEach(function (button) { button.disabled = false; });
+        alert('Execution Error: ' + (error && error.message ? error.message : 'Review failed.'));
+      }).processCounselorReview(sessionToken, reviewId, action, draftText, comment);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindBridge | Student Registration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { min-height: 100vh; display: grid; place-items: center; padding: 28px 16px; background: #f8fafc; font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif; }
+    .register-card { width: min(100%, 520px); background: #fff; border: 1px solid rgba(148,163,184,.16); border-radius: 18px; box-shadow: 0 20px 45px rgba(15,23,42,.08); overflow: hidden; }
+    .register-header { padding: 28px; text-align: center; background: linear-gradient(180deg, rgba(15,118,110,.05), #fff); }
+    .brand-mark { width: 46px; height: 46px; display: grid; place-items: center; margin: 0 auto 12px; border-radius: 14px; color: #fff; background: linear-gradient(135deg,#0f766e,#1e3a8a); font-weight: 800; }
+    h1 { margin: 0; color: #0f172a; font-size: 1.8rem; font-weight: 800; letter-spacing: -.04em; }
+    .brand-subtitle { margin: 8px 0 0; color: #475569; font-size: .9rem; }
+    .register-body { padding: 0 28px 28px; }
+    .registration-message { display: none; margin: 0 0 18px; border-radius: 10px; font-size: .9rem; }
+    .registration-message.is-visible { display: block; }
+    .password-error { display: none; }
+    .form-label { margin-bottom: 8px; color: #475569; font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .form-control, .form-select { height: 52px; border: 1px solid rgba(148,163,184,.3); border-radius: 12px; }
+    .form-control:focus, .form-select:focus { border-color: rgba(15,118,110,.5); box-shadow: 0 0 0 4px rgba(15,118,110,.12); }
+    .btn-primary { width: 100%; height: 52px; border: 0; border-radius: 12px; background: linear-gradient(135deg,#0f766e,#115e59); font-weight: 700; }
+    .loading-state { display: none; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary.is-loading .normal-state { display: none; }
+    .btn-primary.is-loading .loading-state { display: inline-flex; }
+    .spinner-border { width: .9rem; height: .9rem; border-width: .12rem; }
+    .signin-link { margin-top: 16px; text-align: center; color: #475569; font-size: .9rem; }
+    .signin-link a { color: #0f766e; font-weight: 700; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <main class="register-card">
+    <header class="register-header"><div class="brand-mark">M</div><h1>MindBridge</h1><p class="brand-subtitle">Create your student account</p></header>
+    <section class="register-body">
+      <div id="registrationMessage" class="alert registration-message" role="alert" aria-live="polite"></div>
+      <form id="studentRegisterForm" novalidate>
+        <div class="row g-3 mb-3"><div class="col-md-6"><label for="firstName" class="form-label">First Name</label><input type="text" id="firstName" class="form-control" required></div><div class="col-md-6"><label for="lastName" class="form-label">Last Name</label><input type="text" id="lastName" class="form-control" required></div></div>
+        <div class="mb-3"><label for="studentNumber" class="form-label">Student ID Number</label><input type="text" id="studentNumber" class="form-control" required></div>
+        <div class="mb-3"><label for="course" class="form-label">Course / Program</label><input type="text" id="course" class="form-control" required></div>
+        <div class="mb-3"><label for="yearLevel" class="form-label">Year Level</label><select id="yearLevel" class="form-select" required><option value="" selected disabled>Select your year level</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option><option value="5">5th Year+</option></select></div>
+        <div class="mb-3"><label for="email" class="form-label">Institutional Email</label><input type="email" id="email" class="form-control" required></div>
+        <div class="mb-3"><label for="password" class="form-label">Password</label><input type="password" id="password" class="form-control" minlength="8" required></div>
+        <div class="mb-3"><label for="confirmPassword" class="form-label">Confirm Password</label><input type="password" id="confirmPassword" class="form-control" required><span id="passwordError" class="text-danger password-error">Passwords do not match.</span></div>
+        <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="consentCheck" required><label class="form-check-label" for="consentCheck">I agree to the MindBridge Privacy Policy and Counseling Consent</label></div>
+        <button type="submit" class="btn btn-primary" id="registerButton"><span class="normal-state">Create Account</span><span class="loading-state"><span class="spinner-border" role="status" aria-hidden="true"></span>Creating Account...</span></button>
+      </form>
+      <div class="signin-link">Already have an account? <a href="?page=login">Sign In</a></div>
+    </section>
+  </main>
+  <script>
+    const form = document.getElementById('studentRegisterForm');
+    const button = document.getElementById('registerButton');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const passwordError = document.getElementById('passwordError');
+    const registrationMessage = document.getElementById('registrationMessage');
+    function showMessage(message, type) {
+      registrationMessage.textContent = message;
+      registrationMessage.className = 'alert registration-message is-visible alert-' + type;
+    }
+
+    function validatePasswords() {
+      const matches = password.value && confirmPassword.value && password.value === confirmPassword.value;
+      passwordError.style.display = matches || (!password.value && !confirmPassword.value) ? 'none' : 'block';
+      return matches;
+    }
+
+    password.addEventListener('input', validatePasswords);
+    confirmPassword.addEventListener('input', validatePasswords);
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      if (!validatePasswords()) {
+        confirmPassword.focus();
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.\S+$/.test(document.getElementById('email').value.trim())) {
+        showMessage('Please use a valid university email address.', 'danger');
+        return;
+      }
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        showMessage('Registration is available from the deployed MindBridge web app.', 'danger');
+        return;
+      }
+
+      button.disabled = true;
+      button.classList.add('is-loading');
+      google.script.run.withSuccessHandler(function(result) {
+        if (result && result.success) {
+          showMessage(result.message || 'Account created successfully!', 'success');
+          setTimeout(function() { UI.navigateToPage('login'); }, 1500);
+          return;
+        }
+        button.disabled = false;
+        button.classList.remove('is-loading');
+        showMessage(result && result.error ? result.error : 'Registration failed. Please try again.', 'danger');
+      }).withFailureHandler(function(error) {
+        button.disabled = false;
+        button.classList.remove('is-loading');
+        showMessage(error && error.message ? error.message : 'Registration failed. Please try again.', 'danger');
+      }).registerStudent({
+        email: document.getElementById('email').value.trim(),
+        password: password.value,
+        studentNumber: document.getElementById('studentNumber').value.trim(),
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        course: document.getElementById('course').value.trim(),
+        yearLevel: document.getElementById('yearLevel').value
+      });
+    });
+  </script>
+</body>
+</html>

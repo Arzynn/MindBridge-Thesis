@@ -1,0 +1,18 @@
+<main class="student-portal-shell" id="student-progress" data-portal-section="progress">
+  <section class="portal-heading">
+    <p class="portal-eyebrow">Your personal records</p>
+    <h1>My Wellness Progress</h1>
+    <p>Only participation records linked to your account are shown. Score details are not displayed to students.</p>
+  </section>
+  <div class="portal-message" data-portal-message role="status" aria-live="polite">Loading your screening history…</div>
+  <section class="portal-content-stack" data-portal-content hidden>
+    <article class="portal-card">
+      <h2>Past screening participation</h2>
+      <div data-assessment-history></div>
+      <p class="portal-muted" data-history-limit></p>
+    </article>
+  </section>
+</main>
+<script>
+  UI.loadStudentPortal('progress');
+</script>

@@ -1,0 +1,23 @@
+<main class="student-portal-shell" id="student-resources" data-portal-section="resources">
+  <section class="portal-heading">
+    <p class="portal-eyebrow">Support and information</p>
+    <h1>Wellness Resources</h1>
+    <p>Resources published by your guidance team, plus ways to reach human support.</p>
+  </section>
+  <div class="portal-message" data-portal-message role="status" aria-live="polite">Loading approved resources…</div>
+  <section class="portal-content-stack" data-portal-content hidden>
+    <article class="portal-card">
+      <h2>Counselor-approved resources</h2>
+      <div data-approved-resources></div>
+    </article>
+    <article class="portal-card">
+      <h2>Contact human support</h2>
+      <p>For personal support, contact your institution's Guidance Office directly. Contact details shown here are configured by the application and should be confirmed with your school.</p>
+      <div class="resource-contact-list" data-crisis-contacts></div>
+      <p class="portal-muted">If you or someone else is in immediate danger, contact local emergency services or go to the nearest emergency department. Do not wait for an online response.</p>
+    </article>
+  </section>
+</main>
+<script>
+  UI.loadStudentPortal('resources');
+</script>
