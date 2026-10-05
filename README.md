@@ -20,7 +20,7 @@ MindBridge gives students a private place to chat about everyday wellness concer
 
 Project type: BSCS thesis / system-analysis project  
 Repository: <https://github.com/Arzynn/MindBridge-Thesis>  
-Live demo: https://script.google.com/macros/s/AKfycbwjm2nJ4x4hQxKvXj2SojTzNdc0B94_1WdhAQ6XvVxdSEPbeDmARRPX472i6qHRpAKL_A/exec 
+Live demo: https://script.google.com/macros/s/AKfycbxwmbGwaohw6UPXvklEm2d7H9vRrLiQ0mqB-VgK2cf-sgoNL3o8x20_W2Ru4VcWnXI1Mg/exec 
 
 Adviser / institution: Sir Zee
 
